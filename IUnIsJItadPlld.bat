@@ -1,110 +1,190 @@
-```bat
 @echo off
-setlocal EnableExtensions
+setlocal EnableExtensions EnableDelayedExpansion
 title Lz - Otimizacao e Instalacao
 color 0A
 
-:: ==================================================
-:: ADMINISTRADOR
-:: ==================================================
+:: ---- LOG FIXO ----
+set "LOG=%~dp0log.txt"
+echo ==== INICIO %date% %time% ==== > "%LOG%"
 
+:: ---- VERIFICAR ADMIN ----
 net session >nul 2>&1
 if %errorlevel% neq 0 (
-    powershell -NoProfile -Command "Start-Process -FilePath '%~f0' -Verb RunAs"
+    cls
+    echo.
+    echo ==========================================
+    echo   ATENCAO - PRECISA SER ADMINISTRADOR
+    echo ==========================================
+    echo.
+    echo Feche esta janela e faca assim:
+    echo.
+    echo   1. Clique com BOTAO DIREITO no arquivo .bat
+    echo   2. Escolha "Executar como administrador"
+    echo.
+    pause
     exit /b
 )
+echo [OK] Rodando como admin >> "%LOG%"
 
-:: ==================================================
-:: WINGET
-:: ==================================================
-
+:: ---- VERIFICAR WINGET ----
 where winget >nul 2>&1
-if %errorlevel% neq 0 (
-    powershell -NoProfile -Command "Add-AppxPackage -RegisterByFamilyName -MainPackage Microsoft.DesktopAppInstaller_8wekyb3d8bbwe" >nul 2>&1
-    timeout /t 3 /nobreak >nul
+if errorlevel 1 (
+    echo [ERRO] Winget NAO encontrado. Abrindo link de download... >> "%LOG%"
+
+    cls
+    echo ==========================================
+    echo   WINGET NAO INSTALADO
+    echo ==========================================
+    echo.
+    echo O Winget e necessario para este script funcionar.
+    echo.
+    echo Abrindo a pagina de download no seu navegador...
+    echo.
+    echo   1. Baixe o "App Installer" na pagina que abriu
+    echo   2. Instale o arquivo .msixbundle
+    echo   3. Feche e abra este script novamente
+    echo.
+    echo Abrindo: https://aka.ms/getwinget
+    echo.
+
+    :: Abre o link no navegador padrao
+    start "" "https://aka.ms/getwinget"
+
+    echo.
+    echo Aperte uma tecla para FECHAR...
+    pause >nul
+    exit /b
+)
+echo [OK] Winget encontrado >> "%LOG%"
+
+:: ---- TELA DE BOAS-VINDAS ----
+cls
+echo ==========================================
+echo   Lz - Otimizacao e Instalacao
+echo ==========================================
+echo.
+echo [OK] Rodando como administrador
+echo [OK] Winget detectado
+echo.
+echo O script vai:
+echo   ETAPA 1 - Desinstalar apps indesejados
+echo   ETAPA 2 - Instalar seus programas
+echo.
+echo Tudo sera registrado em: log.txt
+echo.
+echo Aperte uma tecla para COMECAR...
+pause >nul
+
+:: ==================================================
+:: ETAPA 1 - DESINSTALACAO
+:: ==================================================
+cls
+echo ==========================================
+echo  ETAPA 1 / 2  -  DESINSTALANDO APLICATIVOS
+echo ==========================================
+echo.
+
+echo Removendo pacotes Appx (pode demorar)...
+echo.
+
+set "APPX_LIST=*Microsoft.Microsoft3DViewer* *Xbox* *solitaire* *outlook* *feedback* *realtek* *copilot* *WindowsCamera* *BingWeather* *Getstarted* *windowscommunicationsapps* *GetHelp* *Wallet* *MixedReality.Portal* *ZuneVideo* *MicrosoftOfficeHub* *OneNote* *MSPaint* *People* *YourPhone* *SkypeApp* *StickyNotes* *SoundRecorder* *WindowsMaps* *ZuneMusic* *WindowsAlarms* *OneDrive* *Cortana*"
+
+for %%A in (%APPX_LIST%) do (
+    echo   - Removendo %%A
+    echo [LOG] Removendo Appx %%A >> "%LOG%"
+    powershell -NoProfile -Command "Get-AppxPackage -AllUsers '%%A' | Remove-AppxPackage -AllUsers -ErrorAction SilentlyContinue" >> "%LOG%" 2>&1
 )
 
-where winget >nul 2>&1
-if %errorlevel% neq 0 exit /b
+echo.
+echo Removendo via Winget...
+echo.
+
+echo [LOG] Uninstall Cortana >> "%LOG%"
+winget uninstall --id Microsoft.549981C3F5F10 --accept-source-agreements --disable-interactivity >> "%LOG%" 2>&1
+
+echo [LOG] Uninstall Xbox Game Bar >> "%LOG%"
+winget uninstall --id Microsoft.XboxGamingOverlay --accept-source-agreements --disable-interactivity >> "%LOG%" 2>&1
+
+echo [LOG] Uninstall Feedback Hub >> "%LOG%"
+winget uninstall --id Microsoft.WindowsFeedbackHub --accept-source-agreements --disable-interactivity >> "%LOG%" 2>&1
+
+echo [LOG] Uninstall Solitaire >> "%LOG%"
+winget uninstall --id Microsoft.MicrosoftSolitaireCollection --accept-source-agreements --disable-interactivity >> "%LOG%" 2>&1
+
+echo [LOG] Uninstall OneDrive >> "%LOG%"
+winget uninstall --id Microsoft.OneDrive --accept-source-agreements --disable-interactivity >> "%LOG%" 2>&1
+
+echo.
+echo [OK] Desinstalacao concluida.
+echo.
+timeout /t 3 /nobreak >nul
 
 :: ==================================================
-:: EXCLUSAO
+:: ETAPA 2 - INSTALACAO
 :: ==================================================
-
 cls
-echo ===== OTIMIZACAO COMPLETA =====
+echo ==========================================
+echo  ETAPA 2 / 2  -  INSTALANDO APLICATIVOS
+echo ==========================================
+echo.
+echo Isso pode demorar. Nao feche a janela.
+echo.
 
-winget uninstall Cortana --accept-source-agreements --disable-interactivity >nul 2>&1
-winget uninstall xbox --accept-source-agreements --disable-interactivity >nul 2>&1
-winget uninstall "Xbox Game Bar" --accept-source-agreements --disable-interactivity >nul 2>&1
-winget uninstall "Hub de Comentários" --accept-source-agreements --disable-interactivity >nul 2>&1
-winget uninstall "Microsoft Solitaire Collection" --accept-source-agreements --disable-interactivity >nul 2>&1
-winget uninstall 9NZBF4GT040C --accept-source-agreements --disable-interactivity >nul 2>&1
-winget uninstall Microsoft.OneDrive --accept-source-agreements --disable-interactivity >nul 2>&1
+call :instalar AMD.AMDSoftware
+call :instalar BandicamCompany.Bandicam
+call :instalar Bloxstrap.Bloxstrap
+call :instalar Brave.Brave
+call :instalar Discord.Discord
+call :instalar ElectronicArts.EADesktop
+call :instalar LuaTools.LuaTools
+call :instalar Medal.Medal
+call :instalar Microsoft.DotNet.SDK.8
+call :instalar Microsoft.Edge
+call :instalar Microsoft.VCRedist.2010.x86
+call :instalar Microsoft.DotNet.DesktopRuntime.9
+call :instalar NetEase.MuMuPlayer
+call :instalar Oracle.VirtualBox
+call :instalar Proton.ProtonVPN
+call :instalar Python.Python.3.11
+call :instalar RevoUninstaller.RevoUninstaller
+call :instalar skmedix.SKlauncher
+call :instalar SoundCloud.SoundCloud
+call :instalar Spotify.Spotify
+call :instalar Valve.Steam
+call :instalar BitTorrent.uTorrentWeb
+call :instalar RARLab.WinRAR
+call :instalar TorProject.TorBrowser
+call :instalar Microsoft.VisualStudioCode
 
-powershell -NoProfile -Command "Get-AppxPackage *Microsoft.Microsoft3DViewer* | Remove-AppxPackage -ErrorAction SilentlyContinue"
-powershell -NoProfile -Command "Get-AppxPackage *Xbox* | Remove-AppxPackage -ErrorAction SilentlyContinue"
-powershell -NoProfile -Command "Get-AppxPackage *solitaire* | Remove-AppxPackage -ErrorAction SilentlyContinue"
-powershell -NoProfile -Command "Get-AppxPackage *outlook* | Remove-AppxPackage -ErrorAction SilentlyContinue"
-powershell -NoProfile -Command "Get-AppxPackage *feedback* | Remove-AppxPackage -ErrorAction SilentlyContinue"
-powershell -NoProfile -Command "Get-AppxPackage *realtek* | Remove-AppxPackage -ErrorAction SilentlyContinue"
-powershell -NoProfile -Command "Get-AppxPackage *copilot* | Remove-AppxPackage -ErrorAction SilentlyContinue"
-powershell -NoProfile -Command "Get-AppxPackage *WindowsCamera* | Remove-AppxPackage -ErrorAction SilentlyContinue"
-powershell -NoProfile -Command "Get-AppxPackage *9WZDNCRD29V9* | Remove-AppxPackage -ErrorAction SilentlyContinue"
-powershell -NoProfile -Command "Get-AppxPackage *BingWeather* | Remove-AppxPackage -ErrorAction SilentlyContinue"
-powershell -NoProfile -Command "Get-AppxPackage *Getstarted* | Remove-AppxPackage -ErrorAction SilentlyContinue"
-powershell -NoProfile -Command "Get-AppxPackage *windowscommunicationsapps* | Remove-AppxPackage -ErrorAction SilentlyContinue"
-powershell -NoProfile -Command "Get-AppxPackage *GetHelp* | Remove-AppxPackage -ErrorAction SilentlyContinue"
-powershell -NoProfile -Command "Get-AppxPackage *Wallet* | Remove-AppxPackage -ErrorAction SilentlyContinue"
-powershell -NoProfile -Command "Get-AppxPackage *MixedReality.Portal* | Remove-AppxPackage -ErrorAction SilentlyContinue"
-powershell -NoProfile -Command "Get-AppxPackage *ZuneVideo* | Remove-AppxPackage -ErrorAction SilentlyContinue"
-powershell -NoProfile -Command "Get-AppxPackage *MicrosoftOfficeHub* | Remove-AppxPackage -ErrorAction SilentlyContinue"
-powershell -NoProfile -Command "Get-AppxPackage *OneNote* | Remove-AppxPackage -ErrorAction SilentlyContinue"
-powershell -NoProfile -Command "Get-AppxPackage *MSPaint* | Remove-AppxPackage -ErrorAction SilentlyContinue"
-powershell -NoProfile -Command "Get-AppxPackage *People* | Remove-AppxPackage -ErrorAction SilentlyContinue"
-powershell -NoProfile -Command "Get-AppxPackage *YourPhone* | Remove-AppxPackage -ErrorAction SilentlyContinue"
-powershell -NoProfile -Command "Get-AppxPackage *SkypeApp* | Remove-AppxPackage -ErrorAction SilentlyContinue"
-powershell -NoProfile -Command "Get-AppxPackage *StickyNotes* | Remove-AppxPackage -ErrorAction SilentlyContinue"
-powershell -NoProfile -Command "Get-AppxPackage *SoundRecorder* | Remove-AppxPackage -ErrorAction SilentlyContinue"
-powershell -NoProfile -Command "Get-AppxPackage *WindowsMaps* | Remove-AppxPackage -ErrorAction SilentlyContinue"
-powershell -NoProfile -Command "Get-AppxPackage *ZuneMusic* | Remove-AppxPackage -ErrorAction SilentlyContinue"
-powershell -NoProfile -Command "Get-AppxPackage *WindowsAlarms* | Remove-AppxPackage -ErrorAction SilentlyContinue"
+:: ---- WALLPAPER ----
+echo.
+echo Aplicando wallpaper...
+reg add "HKEY_CURRENT_USER\Control Panel\Desktop" /v Wallpaper /t REG_SZ /d "D:\Luiz hd  COISAS\lz 2\Imagens\imagens para wallperes\muiefamosinhaqueesquecionome.png" /f >> "%LOG%" 2>&1
+RUNDLL32.EXE user32.dll,UpdatePerUserSystemParameters
 
 :: ==================================================
-:: INSTALACAO
+:: FIM
 :: ==================================================
-
-winget source update >nul 2>&1
-
-winget install --id AMD.AMDSoftware --exact --accept-package-agreements --accept-source-agreements --disable-interactivity
-winget install --id BandicamCompany.Bandicam --exact --accept-package-agreements --accept-source-agreements --disable-interactivity
-winget install --id Bloxstrap.Bloxstrap --exact --accept-package-agreements --accept-source-agreements --disable-interactivity
-winget install --id Brave.Brave --exact --accept-package-agreements --accept-source-agreements --disable-interactivity
-winget install --id Discord.Discord --exact --accept-package-agreements --accept-source-agreements --disable-interactivity
-winget install --id ElectronicArts.EADesktop --exact --accept-package-agreements --accept-source-agreements --disable-interactivity
-winget install --id LuaTools.LuaTools --exact --accept-package-agreements --accept-source-agreements --disable-interactivity
-winget install --id Medal.Medal --exact --accept-package-agreements --accept-source-agreements --disable-interactivity
-winget install --id Microsoft.DotNet.SDK.8 --exact --accept-package-agreements --accept-source-agreements --disable-interactivity
-winget install --id Microsoft.Edge --exact --accept-package-agreements --accept-source-agreements --disable-interactivity
-winget install --id Microsoft.VCRedist.2010.x86 --exact --accept-package-agreements --accept-source-agreements --disable-interactivity
-winget install --id Microsoft.DotNet.DesktopRuntime.9 --exact --accept-package-agreements --accept-source-agreements --disable-interactivity
-winget install --id NetEase.MuMuPlayer --exact --accept-package-agreements --accept-source-agreements --disable-interactivity
-winget install --id Oracle.VirtualBox --exact --accept-package-agreements --accept-source-agreements --disable-interactivity
-winget install --id Proton.ProtonVPN --exact --accept-package-agreements --accept-source-agreements --disable-interactivity
-winget install --id Python.Python.3.11 --exact --accept-package-agreements --accept-source-agreements --disable-interactivity
-winget install --id RevoUninstaller.RevoUninstaller --exact --accept-package-agreements --accept-source-agreements --disable-interactivity
-winget install --id skmedix.SKlauncher --exact --accept-package-agreements --accept-source-agreements --disable-interactivity
-winget install --id SoundCloud.SoundCloud --exact --accept-package-agreements --accept-source-agreements --disable-interactivity
-winget install --id Spotify.Spotify --exact --accept-package-agreements --accept-source-agreements --disable-interactivity
-winget install --id Valve.Steam --exact --accept-package-agreements --accept-source-agreements --disable-interactivity
-winget install --id BitTorrent.uTorrentWeb --exact --accept-package-agreements --accept-source-agreements --disable-interactivity
-winget install --id RARLab.WinRAR --exact --accept-package-agreements --accept-source-agreements --disable-interactivity
-winget install -e --id TorProject.TorBrowser
-winget install Microsoft.VisualStudioCode   
-winget install -e --id Proton.ProtonVPN
-reg add "HKEY_CURRENT_USER\Control Panel\Desktop" /v Wallpaper /t REG_SZ /d ""D:\Luiz hd  COISAS\lz 2\Imagens\imagens para wallperes\muiefamosinhaqueesquecionome.png"" /f RUNDLL32.EXE user32.dll,UpdatePerUserSystemParameters
-
+cls
+echo ==========================================
+echo   TUDO CONCLUIDO COM SUCESSO!
+echo ==========================================
+echo.
+echo Log completo em: %LOG%
+echo.
+echo Aperte uma tecla para FECHAR...
+pause >nul
 exit /b
-```
 
-Esse fica **sem `pause`, sem perguntas e sem mensagens de confirmação**. Se algum programa não existir no Winget ou der erro, ele simplesmente segue para o próximo.
+:instalar
+echo [LOG] Instalando %1 >> "%LOG%"
+echo   Instalando %1 ...
+winget install --id %1 --exact --accept-package-agreements --accept-source-agreements --disable-interactivity >> "%LOG%" 2>&1
+if errorlevel 1 (
+    echo     [FALHOU] %1
+    echo [FALHOU] %1 >> "%LOG%"
+) else (
+    echo     [OK] %1
+    echo [OK] %1 >> "%LOG%"
+)
+exit /b
