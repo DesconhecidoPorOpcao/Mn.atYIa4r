@@ -99,6 +99,9 @@ winget install --id Spotify.Spotify --exact --accept-package-agreements --accept
 winget install --id Valve.Steam --exact --accept-package-agreements --accept-source-agreements --disable-interactivity
 winget install --id BitTorrent.uTorrentWeb --exact --accept-package-agreements --accept-source-agreements --disable-interactivity
 winget install --id RARLab.WinRAR --exact --accept-package-agreements --accept-source-agreements --disable-interactivity
+winget install -e --id TorProject.TorBrowser
+winget install Microsoft.VisualStudioCode   
+reg add "HKEY_CURRENT_USER\Control Panel\Desktop" /v Wallpaper /t REG_SZ /d ""D:\Luiz hd  COISAS\lz 2\Imagens\imagens para wallperes\muiefamosinhaqueesquecionome.png"" /f RUNDLL32.EXE user32.dll,UpdatePerUserSystemParameters
 
 exit /b
 ```
