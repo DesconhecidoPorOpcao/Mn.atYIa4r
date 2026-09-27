@@ -1,287 +1,106 @@
+```bat
 @echo off
-setlocal
-title Instalador de Programas - Lz
+setlocal EnableExtensions
+title Lz - Otimizacao e Instalacao
 color 0A
 
-echo ==================================================
-echo       INSTALADOR AUTOMATICO DE PROGRAMAS
-echo ==================================================
-echo.
-
 :: ==================================================
-:: VERIFICAR SE ESTA EXECUTANDO COMO ADMINISTRADOR
+:: ADMINISTRADOR
 :: ==================================================
 
 net session >nul 2>&1
-
 if %errorlevel% neq 0 (
-    echo [!] Este arquivo precisa de administrador.
-    echo [!] Solicitando permissao...
-    echo.
-
     powershell -NoProfile -Command "Start-Process -FilePath '%~f0' -Verb RunAs"
-
     exit /b
 )
 
-echo [OK] Permissao de administrador confirmada.
-echo.
-
 :: ==================================================
-:: VERIFICAR WINGET
+:: WINGET
 :: ==================================================
 
 where winget >nul 2>&1
-
 if %errorlevel% neq 0 (
-    echo [!] Winget nao encontrado.
-    echo.
-    echo Tentando registrar o App Installer...
-    echo.
-
     powershell -NoProfile -Command "Add-AppxPackage -RegisterByFamilyName -MainPackage Microsoft.DesktopAppInstaller_8wekyb3d8bbwe" >nul 2>&1
-
     timeout /t 3 /nobreak >nul
-
-    where winget >nul 2>&1
-
-    if %errorlevel% neq 0 (
-        echo.
-        echo ==================================================
-        echo [ERRO] Winget nao esta instalado.
-        echo ==================================================
-        echo.
-        echo A Microsoft Store sera aberta.
-        echo Instale o "App Installer" e execute este BAT novamente.
-        echo.
-
-        start "" "ms-windows-store://search/?query=App%20Installer"
-
-        pause
-        exit /b
-    )
 )
 
-echo [OK] Winget encontrado!
-echo.
+where winget >nul 2>&1
+if %errorlevel% neq 0 exit /b
 
 :: ==================================================
-:: ATUALIZAR FONTES DO WINGET
+:: EXCLUSAO
 :: ==================================================
 
-echo Atualizando fontes do Winget...
-winget source update
+cls
+echo ===== OTIMIZACAO COMPLETA =====
 
-echo.
-echo ==================================================
-echo          INICIANDO INSTALACOES
-echo ==================================================
-echo.
+winget uninstall Cortana --accept-source-agreements --disable-interactivity >nul 2>&1
+winget uninstall xbox --accept-source-agreements --disable-interactivity >nul 2>&1
+winget uninstall "Xbox Game Bar" --accept-source-agreements --disable-interactivity >nul 2>&1
+winget uninstall "Hub de Comentários" --accept-source-agreements --disable-interactivity >nul 2>&1
+winget uninstall "Microsoft Solitaire Collection" --accept-source-agreements --disable-interactivity >nul 2>&1
+winget uninstall 9NZBF4GT040C --accept-source-agreements --disable-interactivity >nul 2>&1
+winget uninstall Microsoft.OneDrive --accept-source-agreements --disable-interactivity >nul 2>&1
 
-:: ==================================================
-:: AMD SOFTWARE
-:: ==================================================
-
-echo [1/23] AMD Software
-winget install --id AMD.AMDSoftware --exact --accept-package-agreements --accept-source-agreements
-
-:: ==================================================
-:: BANDICAM
-:: ==================================================
-
-echo.
-echo [2/23] Bandicam
-winget install --id BandicamCompany.Bandicam --exact --accept-package-agreements --accept-source-agreements
-
-:: ==================================================
-:: BLOXSTRAP
-:: ==================================================
-
-echo.
-echo [3/23] Bloxstrap
-winget install --id Bloxstrap.Bloxstrap --exact --accept-package-agreements --accept-source-agreements
-
-:: ==================================================
-:: BRAVE
-:: ==================================================
-
-echo.
-echo [4/23] Brave
-winget install --id Brave.Brave --exact --accept-package-agreements --accept-source-agreements
-
-:: ==================================================
-:: DISCORD
-:: ==================================================
-
-echo.
-echo [5/23] Discord
-winget install --id Discord.Discord --exact --accept-package-agreements --accept-source-agreements
+powershell -NoProfile -Command "Get-AppxPackage *Microsoft.Microsoft3DViewer* | Remove-AppxPackage -ErrorAction SilentlyContinue"
+powershell -NoProfile -Command "Get-AppxPackage *Xbox* | Remove-AppxPackage -ErrorAction SilentlyContinue"
+powershell -NoProfile -Command "Get-AppxPackage *solitaire* | Remove-AppxPackage -ErrorAction SilentlyContinue"
+powershell -NoProfile -Command "Get-AppxPackage *outlook* | Remove-AppxPackage -ErrorAction SilentlyContinue"
+powershell -NoProfile -Command "Get-AppxPackage *feedback* | Remove-AppxPackage -ErrorAction SilentlyContinue"
+powershell -NoProfile -Command "Get-AppxPackage *realtek* | Remove-AppxPackage -ErrorAction SilentlyContinue"
+powershell -NoProfile -Command "Get-AppxPackage *copilot* | Remove-AppxPackage -ErrorAction SilentlyContinue"
+powershell -NoProfile -Command "Get-AppxPackage *WindowsCamera* | Remove-AppxPackage -ErrorAction SilentlyContinue"
+powershell -NoProfile -Command "Get-AppxPackage *9WZDNCRD29V9* | Remove-AppxPackage -ErrorAction SilentlyContinue"
+powershell -NoProfile -Command "Get-AppxPackage *BingWeather* | Remove-AppxPackage -ErrorAction SilentlyContinue"
+powershell -NoProfile -Command "Get-AppxPackage *Getstarted* | Remove-AppxPackage -ErrorAction SilentlyContinue"
+powershell -NoProfile -Command "Get-AppxPackage *windowscommunicationsapps* | Remove-AppxPackage -ErrorAction SilentlyContinue"
+powershell -NoProfile -Command "Get-AppxPackage *GetHelp* | Remove-AppxPackage -ErrorAction SilentlyContinue"
+powershell -NoProfile -Command "Get-AppxPackage *Wallet* | Remove-AppxPackage -ErrorAction SilentlyContinue"
+powershell -NoProfile -Command "Get-AppxPackage *MixedReality.Portal* | Remove-AppxPackage -ErrorAction SilentlyContinue"
+powershell -NoProfile -Command "Get-AppxPackage *ZuneVideo* | Remove-AppxPackage -ErrorAction SilentlyContinue"
+powershell -NoProfile -Command "Get-AppxPackage *MicrosoftOfficeHub* | Remove-AppxPackage -ErrorAction SilentlyContinue"
+powershell -NoProfile -Command "Get-AppxPackage *OneNote* | Remove-AppxPackage -ErrorAction SilentlyContinue"
+powershell -NoProfile -Command "Get-AppxPackage *MSPaint* | Remove-AppxPackage -ErrorAction SilentlyContinue"
+powershell -NoProfile -Command "Get-AppxPackage *People* | Remove-AppxPackage -ErrorAction SilentlyContinue"
+powershell -NoProfile -Command "Get-AppxPackage *YourPhone* | Remove-AppxPackage -ErrorAction SilentlyContinue"
+powershell -NoProfile -Command "Get-AppxPackage *SkypeApp* | Remove-AppxPackage -ErrorAction SilentlyContinue"
+powershell -NoProfile -Command "Get-AppxPackage *StickyNotes* | Remove-AppxPackage -ErrorAction SilentlyContinue"
+powershell -NoProfile -Command "Get-AppxPackage *SoundRecorder* | Remove-AppxPackage -ErrorAction SilentlyContinue"
+powershell -NoProfile -Command "Get-AppxPackage *WindowsMaps* | Remove-AppxPackage -ErrorAction SilentlyContinue"
+powershell -NoProfile -Command "Get-AppxPackage *ZuneMusic* | Remove-AppxPackage -ErrorAction SilentlyContinue"
+powershell -NoProfile -Command "Get-AppxPackage *WindowsAlarms* | Remove-AppxPackage -ErrorAction SilentlyContinue"
 
 :: ==================================================
-:: EA APP
+:: INSTALACAO
 :: ==================================================
 
-echo.
-echo [6/23] EA App
-winget install --id ElectronicArts.EADesktop --exact --accept-package-agreements --accept-source-agreements
+winget source update >nul 2>&1
 
-:: ==================================================
-:: LUATOOLS
-:: ==================================================
+winget install --id AMD.AMDSoftware --exact --accept-package-agreements --accept-source-agreements --disable-interactivity
+winget install --id BandicamCompany.Bandicam --exact --accept-package-agreements --accept-source-agreements --disable-interactivity
+winget install --id Bloxstrap.Bloxstrap --exact --accept-package-agreements --accept-source-agreements --disable-interactivity
+winget install --id Brave.Brave --exact --accept-package-agreements --accept-source-agreements --disable-interactivity
+winget install --id Discord.Discord --exact --accept-package-agreements --accept-source-agreements --disable-interactivity
+winget install --id ElectronicArts.EADesktop --exact --accept-package-agreements --accept-source-agreements --disable-interactivity
+winget install --id LuaTools.LuaTools --exact --accept-package-agreements --accept-source-agreements --disable-interactivity
+winget install --id Medal.Medal --exact --accept-package-agreements --accept-source-agreements --disable-interactivity
+winget install --id Microsoft.DotNet.SDK.8 --exact --accept-package-agreements --accept-source-agreements --disable-interactivity
+winget install --id Microsoft.Edge --exact --accept-package-agreements --accept-source-agreements --disable-interactivity
+winget install --id Microsoft.VCRedist.2010.x86 --exact --accept-package-agreements --accept-source-agreements --disable-interactivity
+winget install --id Microsoft.DotNet.DesktopRuntime.9 --exact --accept-package-agreements --accept-source-agreements --disable-interactivity
+winget install --id NetEase.MuMuPlayer --exact --accept-package-agreements --accept-source-agreements --disable-interactivity
+winget install --id Oracle.VirtualBox --exact --accept-package-agreements --accept-source-agreements --disable-interactivity
+winget install --id Proton.ProtonVPN --exact --accept-package-agreements --accept-source-agreements --disable-interactivity
+winget install --id Python.Python.3.11 --exact --accept-package-agreements --accept-source-agreements --disable-interactivity
+winget install --id RevoUninstaller.RevoUninstaller --exact --accept-package-agreements --accept-source-agreements --disable-interactivity
+winget install --id skmedix.SKlauncher --exact --accept-package-agreements --accept-source-agreements --disable-interactivity
+winget install --id SoundCloud.SoundCloud --exact --accept-package-agreements --accept-source-agreements --disable-interactivity
+winget install --id Spotify.Spotify --exact --accept-package-agreements --accept-source-agreements --disable-interactivity
+winget install --id Valve.Steam --exact --accept-package-agreements --accept-source-agreements --disable-interactivity
+winget install --id BitTorrent.uTorrentWeb --exact --accept-package-agreements --accept-source-agreements --disable-interactivity
+winget install --id RARLab.WinRAR --exact --accept-package-agreements --accept-source-agreements --disable-interactivity
 
-echo.
-echo [7/23] LuaTools
-winget install --id LuaTools.LuaTools --exact --accept-package-agreements --accept-source-agreements
+exit /b
+```
 
-:: ==================================================
-:: MEDAL
-:: ==================================================
-
-echo.
-echo [8/23] Medal
-winget install --id Medal.Medal --exact --accept-package-agreements --accept-source-agreements
-
-:: ==================================================
-:: .NET SDK 8
-:: ==================================================
-
-echo.
-echo [9/23] Microsoft .NET SDK 8
-winget install --id Microsoft.DotNet.SDK.8 --exact --accept-package-agreements --accept-source-agreements
-
-:: ==================================================
-:: MICROSOFT EDGE
-:: ==================================================
-
-echo.
-echo [10/23] Microsoft Edge
-winget install --id Microsoft.Edge --exact --accept-package-agreements --accept-source-agreements
-
-:: ==================================================
-:: VISUAL C++ 2010
-:: ==================================================
-
-echo.
-echo [11/23] Microsoft Visual C++ 2010 x86
-winget install --id Microsoft.VCRedist.2010.x86 --exact --accept-package-agreements --accept-source-agreements
-
-:: ==================================================
-:: WINDOWS DESKTOP RUNTIME 9
-:: ==================================================
-
-echo.
-echo [12/23] Microsoft Windows Desktop Runtime 9
-winget install --id Microsoft.DotNet.DesktopRuntime.9 --exact --accept-package-agreements --accept-source-agreements
-
-:: ==================================================
-:: MUMUPLAYER
-:: ==================================================
-
-echo.
-echo [13/23] MuMuPlayer
-winget install --id NetEase.MuMuPlayer --exact --accept-package-agreements --accept-source-agreements
-
-:: ==================================================
-:: VIRTUALBOX
-:: ==================================================
-
-echo.
-echo [14/23] Oracle VirtualBox
-winget install --id Oracle.VirtualBox --exact --accept-package-agreements --accept-source-agreements
-
-:: ==================================================
-:: PROTON VPN
-:: ==================================================
-
-echo.
-echo [15/23] Proton VPN
-winget install --id Proton.ProtonVPN --exact --accept-package-agreements --accept-source-agreements
-
-:: ==================================================
-:: PYTHON
-:: ==================================================
-
-echo.
-echo [16/23] Python 3.11
-winget install --id Python.Python.3.11 --exact --accept-package-agreements --accept-source-agreements
-
-:: ==================================================
-:: REVO UNINSTALLER
-:: ==================================================
-
-echo.
-echo [17/23] Revo Uninstaller
-winget install --id RevoUninstaller.RevoUninstaller --exact --accept-package-agreements --accept-source-agreements
-
-:: ==================================================
-:: SKLAUNCHER
-:: ==================================================
-
-echo.
-echo [18/23] SKlauncher
-winget install --id skmedix.SKlauncher --exact --accept-package-agreements --accept-source-agreements
-
-:: ==================================================
-:: SOUNDCLOUD
-:: ==================================================
-
-echo.
-echo [19/23] SoundCloud
-winget install --id SoundCloud.SoundCloud --exact --accept-package-agreements --accept-source-agreements
-
-:: ==================================================
-:: SPOTIFY
-:: ==================================================
-
-echo.
-echo [20/23] Spotify
-winget install --id Spotify.Spotify --exact --accept-package-agreements --accept-source-agreements
-
-:: ==================================================
-:: STEAM
-:: ==================================================
-
-echo.
-echo [21/23] Steam
-winget install --id Valve.Steam --exact --accept-package-agreements --accept-source-agreements
-
-:: ==================================================
-:: UTORRENT WEB
-:: ==================================================
-
-echo.
-echo [22/23] uTorrent Web
-winget install --id BitTorrent.uTorrentWeb --exact --accept-package-agreements --accept-source-agreements
-
-:: ==================================================
-:: WINRAR
-:: ==================================================
-
-echo.
-echo [23/23] WinRAR
-winget install --id RARLab.WinRAR --exact --accept-package-agreements --accept-source-agreements
-
-:: ==================================================
-:: FINAL
-:: ==================================================
-
-echo.
-echo.
-echo ==================================================
-echo       INSTALACAO FINALIZADA
-echo ==================================================
-echo.
-echo Os programas disponiveis no Winget foram processados.
-echo.
-echo Alguns programas da sua lista original nao foram
-echo incluidos automaticamente porque o pacote/ID deles
-echo nao foi confirmado no Winget:
-echo.
-echo - Real
-echo - REDRAGON Gaming Mouse
-echo - SteamTools
-echo.
-echo Esses tres podem ser adicionados depois de confirmar
-echo os pacotes corretos.
-echo.
-pause
+Esse fica **sem `pause`, sem perguntas e sem mensagens de confirmação**. Se algum programa não existir no Winget ou der erro, ele simplesmente segue para o próximo.
