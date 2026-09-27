@@ -1,0 +1,19 @@
+@echo off
+setlocal enabledelayedexpansion
+
+REM ==== EDITE AQUI ====
+set qtd=10000
+set texto=Lxzinn__ passou por aq otario KKKKKK 🤣
+REM =====================
+
+set "desktop=%USERPROFILE%\Desktop"
+
+for /L %%f in (1,1,500) do (
+    if exist "%desktop%\Teste%%f.txt" del "%desktop%\Teste%%f.txt"
+    for /L %%i in (1,1,%qtd%) do (
+        echo %texto%>>"%desktop%\Teste%%f.txt"
+    )
+)
+
+echo 5 arquivos criados na area de trabalho: Teste1.txt ate Teste5.txt
+pause
